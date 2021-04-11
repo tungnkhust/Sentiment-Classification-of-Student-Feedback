@@ -1,0 +1,9 @@
+emoji
+seqeval
+scikit-learn
+torch
+torchvision
+numpy
+pandas
+matplotlib
+rasa
