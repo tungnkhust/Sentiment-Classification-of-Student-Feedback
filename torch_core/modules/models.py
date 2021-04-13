@@ -27,6 +27,8 @@ class BaseModel(nn.Module):
         topic_true = []
 
         for i, (x_vector, sent_vector, topic_vector, x_mask) in enumerate(test_loader):
+            sent_vector.to(device)
+            topic_vector.to(device)
             out = self.forward(x_vector.to(device), x_mask.to(device))
             sent_out = out[0]
             topic_out = out[1]

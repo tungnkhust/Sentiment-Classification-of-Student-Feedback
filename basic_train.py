@@ -72,6 +72,8 @@ def train(
         train_loss = 0.
         model.train()
         for i, (x_vector, sent_vector, topic_vector, x_mask) in enumerate(train_loader):
+            sent_vector.to(device)
+            topic_vector.to(device)
             optimizer.zero_grad()
             out = model(x_vector.to(device), x_mask.to(device))
             sent_out = out[0]
