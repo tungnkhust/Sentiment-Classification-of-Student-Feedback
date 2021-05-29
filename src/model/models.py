@@ -2,8 +2,8 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 from torch.nn import init
-from torch_core.modules.nn import Attention
-from torch_core.metrics import get_metrics
+from src.modules.nn import Attention
+from src.training.metrics import get_metrics
 from torch.utils.data import DataLoader
 
 
@@ -30,10 +30,7 @@ class BaseModel(nn.Module):
             out = self.forward(x_vector.to(device), x_mask.to(device))
             sent_out = out[0]
             topic_out = out[1]
-            loss = self.compute_loss(sent_out.to(device),
-                                     topic_out.to(device),
-                                     sent_vector.to(device),
-                                     topic_vector.to(device))
+            loss = self.compute_loss(sent_out, topic_out, sent_vector.to(device), topic_vector.to(device))
             sent_true.extend(sent_vector.tolist())
             topic_true.extend(topic_vector.tolist())
 
