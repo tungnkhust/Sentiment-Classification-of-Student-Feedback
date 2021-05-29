@@ -3,19 +3,15 @@ import time
 import torch
 import json
 import yaml
-import pandas as pd
 import argparse
-from argparse import Namespace
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from sklearn.model_selection import train_test_split
-from torch_core.dictionary import build_vocab, get_label_dict
-from torch_core.utils import get_n_params, load_w2v
-from torch_core.utils import make_train_state, update_train_state
-from torch_core.dataset import LabelDataset
-from torch_core.modules.models import BasicModel
-from torch_core.dictionary import Dictionary, TokenDictionary
-from load_data import load_data
+from utils.utils import get_n_params, load_w2v
+from utils.utils import make_train_state, update_train_state
+from src.data.dataset import LabelDataset
+from src.models.models import BasicModel
+from src.data.dictionary import Dictionary, TokenDictionary
+from utils.load_data import load_data
 
 
 def train(
@@ -167,7 +163,7 @@ if __name__ == '__main__':
     topic_dict = Dictionary(item2idx=topic2idx)
     print(sent_dict.item2idx)
 
-    # Create train, val, test datasets.
+    # Create train, val, test data.
     train_dataset = LabelDataset(train_df, seq_vocab, sent_dict, topic_dict, max_seq_len=max_seq_len)
     val_dataset = LabelDataset(val_df, seq_vocab, sent_dict, topic_dict, max_seq_len=max_seq_len)
     test_dataset = LabelDataset(test_df, seq_vocab, sent_dict, topic_dict, max_seq_len=max_seq_len)

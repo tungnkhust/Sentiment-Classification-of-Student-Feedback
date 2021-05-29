@@ -2,8 +2,8 @@ import os
 import pandas as pd
 import yaml
 import argparse
-from normalize_text import normalize
-from torch_core.dictionary import build_vocab, build_char_vocab
+from src.data.normalize_text import normalize
+from src.data.dictionary import build_vocab
 
 
 def load_data_from_dir(dir_path, normal_args=None, sent_dict=None, topic_dict=None):
