@@ -1,5 +1,6 @@
 # BTL_NLP
 
+<<<<<<< HEAD
 ## Set up
 - Cài đặt các package và thư viện liên quan
 ```bash
@@ -44,3 +45,11 @@ python word2vec/train_w2v_adapt.py \
 - model_dir: đường dẫn tới mơi lưu model mới sau khi train.
 - name: tên của file model mới sẽ được lưu.
 - n_epochs: số chu kỳ huấn luyện
+=======
+# Install
+`pip install -r requirement.txt`
+
+# Run train
+## train with basic model
+`python basic_train.py`
+>>>>>>> 20834ee6c58340d8db034923e8ba94a98bc32272
