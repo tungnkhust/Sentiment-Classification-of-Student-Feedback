@@ -222,11 +222,12 @@ class ClassificationLearner:
         })
         output = self.model.forward_on_instance(instance)
         y_prediction = np.argmax(output['probs'], axis=-1)
+        y_probs = np.max(output['probs'], axis=-1)
         prediction = self.vocab.get_token_from_index(y_prediction, namespace='labels')
-        return prediction
+        return prediction, y_probs
 
     def predict_on_texts(self, texts: List[str]):
-        predictions = [self.predict(text) for text in texts]
+        predictions = [self.predict(text)[0] for text in texts]
         return predictions
 
     def load_weight(self, weight_path):

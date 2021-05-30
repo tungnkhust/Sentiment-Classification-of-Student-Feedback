@@ -4,7 +4,6 @@ import itertools
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
-from allennlp.data.vocabulary import Vocabulary
 
 
 def load_vocab(vocab_path: Dict[str, str], min_count: Dict[str, int]):

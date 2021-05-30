@@ -1,48 +1,59 @@
 import os
 import shutil
+import json
 from classification.learners.classification_learner import ClassificationLearner
+import argparse
 
 
-if __name__ == '__main__':
+def train(config, checkpoint=False):
     if os.path.exists('models') is False:
         os.mkdir('models')
 
-    serialization_dir = 'models/TopicCLF'
+    serialization_dir = config['serialization_dir']
 
-    if os.path.exists(serialization_dir):
-        shutil.rmtree(serialization_dir)
+    if checkpoint is False:
+        if os.path.exists(serialization_dir):
+            shutil.rmtree(serialization_dir)
 
     sentiment_clf_learner = ClassificationLearner(
-        train_path='data/processed/train.csv',
+        train_path=config['train_path'],
+        text_col=config['text_col'],
+        label_col=config['label_col'],
         serialization_dir=serialization_dir,
-        text_col='text',
-        label_col='topic',
-        val_path='data/processed/val.csv',
-        test_path='data/processed/test.csv',
+        val_path=config['val_path'],
+        test_path=config['test_path'],
         vocab=None,
-        vocab_path={'tokens': 'pretrained/viki/viki_w2v_vocab.txt'},
+        vocab_path=config['vocab_path'],
         extend_vocab=True,
-        max_tokens=100,
-        min_count={'tokens': 2},
-        embedding_dim=100,
-        char_embedding_dim=30,
-        ngram_filter_sizes=(3,),
-        num_filters=64,
-        hidden_size=256,
-        dropout=0.4,
-        num_layers=2,
-        pretrained_w2v_path='pretrained/viki/viki_w2v.txt',
-        # pretrained_c2v_path='models/NextTokenLM/pretrained_lm/token_characters.txt',
-        # char_encoder_path='models/NextTokenLM/pretrained_lm/char_encoder.pth',
-        # seq_encoder_path='models/NextTokenLM/pretrained_lm/seq_encoder.pth'
+        max_tokens=config['max_tokens'],
+        min_count=config['min_count'],
+        embedding_dim=config['embedding_dim'],
+        char_embedding_dim=config['char_embedding_dim'],
+        ngram_filter_sizes=config['ngram_filter_sizes'],
+        num_filters=config['num_filters'],
+        hidden_size=config['hidden_size'],
+        dropout=config['dropout'],
+        num_layers=config['num_layers'],
+        pretrained_w2v_path=config['pretrained_w2v_path'],
+        pretrained_c2v_path=config['pretrained_c2v_path'],
+        char_encoder_path=config['char_encoder_path'],
+        seq_encoder_path=config['seq_encoder_path']
     )
 
     sentiment_clf_learner.train(
-        lr=0.001,
-        weight_decay=0.001,
-        batch_size=256,
-        num_epochs=50,
-        grad_clipping=5,
+        lr=config['lr'],
+        weight_decay=config['weight_decay'],
+        batch_size=config['batch_size'],
+        num_epochs=config['num_epochs'],
+        grad_clipping=config['grad_clipping'],
     )
 
-    sentiment_clf_learner.vocab.save_to_files(serialization_dir + '/vocabulary')
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-cf', '--config', type=str, default='configs/topic_config.json', help='')
+
+    args = parser.parse_args()
+    with open(args.config, 'r') as pf:
+        config = json.load(pf)
+        train(config, checkpoint=False)
