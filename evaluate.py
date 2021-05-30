@@ -22,13 +22,13 @@ def evaluate(test_df, label_col, config_path):
 
     # get metric scores
     acc = accuracy_score(y_true, y_pred)
-    precision = precision_score(y_true, y_pred, average='marco')
-    recall = recall_score(y_true, y_pred, average='marco')
-    f1 = f1_score(y_true, y_pred, average='marco')
+    precision = precision_score(y_true, y_pred, average='macro')
+    recall = recall_score(y_true, y_pred, average='macro')
+    f1 = f1_score(y_true, y_pred, average='macro')
 
     labels = list(vocab.get_token_to_index_vocabulary('labels').keys())
     report = classification_report(label_true, label_pred, labels=labels)
-
+    print(f'Evaluate {label_col}')
     print('Accuracy :', acc)
     print('Precision:', precision)
     print('Recall   :', recall)
@@ -59,5 +59,5 @@ if __name__ == '__main__':
     sent_config_path = 'configs/sentiment_config.json'
 
     test_df = pd.read_csv('data/processed/test.csv')
-    evaluate(test_df, label_col='sentiment', config_path=topic_config_path)
-    evaluate(test_df, label_col='topic', config_path=sent_config_path)
+    evaluate(test_df, label_col='sentiment', config_path=sent_config_path)
+    evaluate(test_df, label_col='topic', config_path=topic_config_path)
