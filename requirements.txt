@@ -1,12 +1,9 @@
 emoji
-seqeval
 allennlp==2.2.0
 allennlp_models
 scikit-learn
 torch
-torchvision
 numpy
 pandas
 matplotlib
-rasa
 gensim
