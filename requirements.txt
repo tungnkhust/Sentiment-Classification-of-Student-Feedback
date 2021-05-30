@@ -1,6 +1,6 @@
 emoji
 allennlp==2.2.0
-allennlp_models
+allennlp-models==2.2.0
 scikit-learn
 torch
 numpy
