@@ -2,6 +2,7 @@ import os
 import shutil
 from classification.learners.classification_learner import ClassificationLearner
 
+
 if __name__ == '__main__':
     if os.path.exists('models') is False:
         os.mkdir('models')
@@ -12,14 +13,16 @@ if __name__ == '__main__':
         shutil.rmtree(serialization_dir)
 
     sentiment_clf_learner = ClassificationLearner(
-        train_path='data/processed/train_drop.csv',
+        train_path='data/processed/train.csv',
         serialization_dir=serialization_dir,
-        val_path='data/processed/val_drop.csv',
-        test_path='data/processed/test_drop.csv',
+        text_col='text',
+        label_col='topic',
+        val_path='data/processed/val.csv',
+        test_path='data/processed/test.csv',
         vocab=None,
         vocab_path={'tokens': 'pretrained/viki/viki_w2v_vocab.txt'},
         extend_vocab=True,
-        max_tokens=80,
+        max_tokens=100,
         min_count={'tokens': 2},
         embedding_dim=100,
         char_embedding_dim=30,

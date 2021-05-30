@@ -9,7 +9,7 @@ from allennlp.training.trainer import GradientDescentTrainer
 from allennlp.training.optimizers import AdamOptimizer
 from allennlp.training.util import evaluate
 from allennlp.modules.seq2vec_encoders import CnnEncoder, LstmSeq2VecEncoder
-from classification.models.classification_model import TextClassifier
+from classification.model.classification_model import TextClassifier
 from classification.data_reader.classification_reader import ClassificationDataReader
 from utils.utils import load_vocab
 from allennlp.data import Token, Instance
@@ -23,6 +23,8 @@ class ClassificationLearner:
     def __init__(
             self,
             train_path: str = None,
+            label_col: str = 'sentiment',
+            text_col: str = 'text',
             vocab: Vocabulary = None,
             vocab_path: Dict[str, str] = None,
             test_path: str = None,
@@ -56,8 +58,12 @@ class ClassificationLearner:
                     )
                 }
         # create data reader
-        self.data_reader = ClassificationDataReader(max_tokens=max_tokens,
-                                                    token_indexers=self._token_indexers)
+        self.data_reader = ClassificationDataReader(
+            max_tokens=max_tokens,
+            token_indexers=self._token_indexers,
+            text_col=text_col,
+            label_col=label_col
+        )
 
         # create dataset
         if train_path is not None:

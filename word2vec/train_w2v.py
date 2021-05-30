@@ -30,7 +30,7 @@ class LossLogger(CallbackAny2Vec):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--corpus_path', type=str, default='data/viki2021_processed', help='')
+    parser.add_argument('--corpus_path', type=str, default='data/viki2021', help='')
     parser.add_argument('--model_dir', type=str, default='models/viki', help='')
     parser.add_argument('--name', type=str, default='viki', help='')
     parser.add_argument('--vector_size', type=int, default=100, help='')

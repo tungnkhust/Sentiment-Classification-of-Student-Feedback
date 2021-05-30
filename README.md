@@ -12,7 +12,7 @@ pip install -r requirement.txt
 #### Để huấn luyện word embedding từ đầu chạy lệnh sau:
 ```
 python word2vec/train_w2v.py \
---corpus_path='data/wiki_corpus.txt' \
+--corpus_path='data/viki' \
 --model_dir='models/word2vec' \
 --name='viki' \
 --vector_size=100 \

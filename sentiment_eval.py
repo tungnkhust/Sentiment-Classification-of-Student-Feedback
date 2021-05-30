@@ -36,15 +36,14 @@ if __name__ == '__main__':
 
     # get metric scores
     acc = accuracy_score(y_true, y_pred)
-    precision = precision_score(y_true, y_pred, average='macro')
-    recall = recall_score(y_true, y_pred, average='macro')
-    f1 = f1_score(y_true, y_pred, average='macro')
+    precision = precision_score(y_true, y_pred, average='marco')
+    recall = recall_score(y_true, y_pred, average='marco')
+    f1 = f1_score(y_true, y_pred, average='marco')
 
     labels = list(vocab.get_token_to_index_vocabulary('labels').keys())
 
     report = classification_report(sent_true, sent_pred, labels=labels)
-    print(y_true[:100])
-    print(y_pred[:100])
+
     print('Accuracy :', acc)
     print('Precision:', precision)
     print('Recall   :', recall)
@@ -53,7 +52,7 @@ if __name__ == '__main__':
     if os.path.exists('results') is False:
         os.mkdir('results')
 
-    with open('results/scores.txt', 'w') as pf:
+    with open('results/sentiment_scores.txt', 'w') as pf:
         pf.write(f'Accuracy score :{acc}\n')
         pf.write(f'Precision score:{precision}\n')
         pf.write(f'Recall score   :{recall}\n')

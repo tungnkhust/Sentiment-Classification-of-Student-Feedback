@@ -26,10 +26,10 @@ class LossLogger(CallbackAny2Vec):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--corpus_path', type=str, default='data/wiki_corpus.txt', help='')
-    parser.add_argument('--model_path', type=str, default='models/viki/wiki_w2v.bin', help='')
-    parser.add_argument('--model_dir', type=str, default='models/viki_adapt', help='')
-    parser.add_argument('--name', type=str, default='adapt', help='')
+    parser.add_argument('--corpus_path', type=str, default='data/sentence.txt', help='')
+    parser.add_argument('--model_path', type=str, default='pretrained/viki/viki_w2v.bin', help='')
+    parser.add_argument('--model_dir', type=str, default='pretrained/viki_adapt', help='')
+    parser.add_argument('--name', type=str, default='viki_adapt', help='')
     parser.add_argument('--n_epochs', type=int, default=20, help='')
     parser.add_argument('--min_count', type=int, default=0, help='')
 
@@ -45,10 +45,10 @@ if __name__ == '__main__':
     else:
         name = f'{args.name}_w2v'
 
-    if os.path.exists(args.model_dir):
+    if os.path.exists(args.model_dir) is False:
         os.mkdir(args.model_dir)
 
-    w2v_adap_path = args.model_dir + f'{name}.txt'
+    w2v_adap_path = args.model_dir + f'/{name}.txt'
     vocab_adap_path = args.model_dir + f'/{name}_vocab.txt'
     model_adap_path = args.model_dir + f'/{name}.bin'
 
