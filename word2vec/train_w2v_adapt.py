@@ -54,6 +54,7 @@ if __name__ == '__main__':
 
     w2v_model = Word2Vec.load(fname=args.model_path)
 
+    print('sg', w2v_model.sg)
     sentence = LineSentence(args.corpus_path)
     sentence = list(sentence)
     w2v_model.min_count = args.min_count

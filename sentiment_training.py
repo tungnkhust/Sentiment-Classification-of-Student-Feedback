@@ -16,15 +16,15 @@ def train(config, checkpoint=False):
             shutil.rmtree(serialization_dir)
 
     sentiment_clf_learner = ClassificationLearner(
-        train_path='data/processed/train.csv',
-        text_col='text',
-        label_col='sentiment',
-        serialization_dir=serialization_dir,
-        val_path='data/processed/val.csv',
-        test_path='data/processed/test.csv',
+        train_path=config['train_path'],
+        text_col=config['text_col'],
+        label_col=config['label_col'],
+        serialization_dir=config['serialization_dir'],
+        val_path=config['val_path'],
+        test_path=config['test_path'],
         vocab=None,
-        vocab_path={'tokens': 'pretrained/viki/viki_w2v_vocab.txt'},
-        extend_vocab=True,
+        vocab_path=config['vocab_path'],
+        extend_vocab=config['extend_vocab'],
         max_tokens=config['max_tokens'],
         min_count=config['min_count'],
         embedding_dim=config['embedding_dim'],
