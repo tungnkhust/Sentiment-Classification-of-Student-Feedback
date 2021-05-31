@@ -6,6 +6,7 @@
   "sent_col": "sentiment",
   "topic_col": "topic",
   "serialization_dir": "models/JointModel",
+  "token_characters": true,
   "vocab_path": {"tokens": "pretrained/viki/viki_w2v_vocab.txt"},
   "extend_vocab": true,
   "max_tokens": 100,

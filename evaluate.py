@@ -51,13 +51,18 @@ def evaluate(test_df, label_col, config_path):
 
     test_df['sentiment_predict'] = label_pred
     false_pred_df = test_df[test_df['sentiment'] != test_df['sentiment_predict']]
-    false_pred_df.to_csv('results/false_sentiment_predictions.csv', index=False)
+    false_pred_df.to_csv(f'results/false_{label_col}_predictions.csv', index=False)
 
 
 if __name__ == '__main__':
-    topic_config_path = 'configs/topic_config.json'
-    sent_config_path = 'configs/sentiment_config.json'
+    topic_config_path = 'model_done/bilstm/topic/config.json'
+    sent_config_path = 'model_done/bilstm/sentiment/config.json'
 
+    # topic_config_path = 'model_done/bilstm-character/topic/config.json'
+    # sent_config_path = 'model_done/bilstm-character/sentiment/config.json'
+
+    print('topic_config_path', topic_config_path)
+    print('sent_config_path', sent_config_path)
     test_df = pd.read_csv('data/processed/test.csv')
     evaluate(test_df, label_col='sentiment', config_path=sent_config_path)
     evaluate(test_df, label_col='topic', config_path=topic_config_path)

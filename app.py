@@ -12,8 +12,8 @@ cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--sent_config_path', type=str, default='configs/sentiment_config.json', help='')
-parser.add_argument('--topic_config_path', type=str, default='configs/topic_config.json', help='')
+parser.add_argument('--sent_config_path', type=str, default='model_done/bilstm-character/sentiment/config.json', help='')
+parser.add_argument('--topic_config_path', type=str, default='model_done/bilstm-character/topic/config.json', help='')
 
 args = parser.parse_args()
 

@@ -238,5 +238,6 @@ class JointLearner:
         return predictions
 
     def load_weight(self, weight_path):
-        self.model.load_state_dict(torch.load(weight_path))
+        print(self.device)
+        self.model.load_state_dict(torch.load(weight_path, map_location=torch.device(self.device)))
 

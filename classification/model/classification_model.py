@@ -10,15 +10,15 @@ from allennlp.nn import util
 class TextClassifier(Model):
     def __init__(self,
                  vocab: Vocabulary,
-                 text_feild_embedder: TextFieldEmbedder,
+                 embedder: TextFieldEmbedder,
                  encoder: Seq2VecEncoder):
         super().__init__(vocab)
-        self._text_feild_embedder = text_feild_embedder
-        self._encoder = encoder
+        self.embedder = embedder
+        self.encoder = encoder
         num_labels = vocab.get_vocab_size("labels")
-        self._classifier = torch.nn.Linear(encoder.get_output_dim(), num_labels)
+        self.classifier = torch.nn.Linear(encoder.get_output_dim(), num_labels)
         self.accuracy = CategoricalAccuracy()
-        self._f1_measure = F1Measure(1)
+        self.f1_measure = F1Measure(1)
 
     def forward(
             self,
@@ -26,13 +26,13 @@ class TextClassifier(Model):
             label: torch.Tensor=None,
     ) -> Dict[str, torch.Tensor]:
         # Shape: (batch_size, num_tokens, embedding_dim)
-        embedded_text = self._text_feild_embedder(tokens)
+        embedded_text = self.embedder(tokens)
         # Shape: (batch_size, num_tokens)
         mask = util.get_text_field_mask(tokens)
         # Shape: (batch_size, encoding_dim)
-        encoded_text = self._encoder(embedded_text, mask)
+        encoded_text = self.encoder(embedded_text, mask)
         # Shape: (batch_size, num_labels)
-        logits = self._classifier(encoded_text)
+        logits = self.classifier(encoded_text)
         # Shape: (batch_size, num_labels)
         probs = torch.nn.functional.softmax(logits)
         # Shape: (1,)
@@ -44,13 +44,13 @@ class TextClassifier(Model):
             loss = torch.nn.functional.cross_entropy(logits, label)
             output['loss'] = loss
             self.accuracy(logits, label)
-            self._f1_measure(logits, label)
+            self.f1_measure(logits, label)
 
         return output
     
     def get_metrics(self, reset: bool = False):
 
-        metrics_result = self._f1_measure.get_metric(reset)
+        metrics_result = self.f1_measure.get_metric(reset)
         metrics_result['accuracy'] = self.accuracy.get_metric(reset)
         
         return metrics_result

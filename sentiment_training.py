@@ -23,6 +23,7 @@ def train(config, checkpoint=False):
         val_path=config['val_path'],
         test_path=config['test_path'],
         vocab=None,
+        token_characters=config['token_characters'],
         vocab_path=config['vocab_path'],
         extend_vocab=config['extend_vocab'],
         max_tokens=config['max_tokens'],

@@ -31,6 +31,7 @@ class ClassificationLearner:
             val_path: str = None,
             max_tokens: int = 80,
             token_indexers=None,
+            token_characters=True,
             min_count=None,
             extend_vocab=False,
             embedding_dim=100,
@@ -50,13 +51,19 @@ class ClassificationLearner:
         if token_indexers is not None:
             self._token_indexers = token_indexers
         else:
-            self._token_indexers = {
-                    "tokens": SingleIdTokenIndexer(namespace="tokens"),
-                    "token_characters": TokenCharactersIndexer(
-                        namespace="token_characters",
-                        min_padding_length=3
-                    )
+            if token_characters:
+                self._token_indexers = {
+                        "tokens": SingleIdTokenIndexer(namespace="tokens"),
+                        "token_characters": TokenCharactersIndexer(
+                            namespace="token_characters",
+                            min_padding_length=3
+                        )
+                    }
+            else:
+                self._token_indexers = {
+                    "tokens": SingleIdTokenIndexer(namespace="tokens")
                 }
+
         # create data reader
         self.data_reader = ClassificationDataReader(
             max_tokens=max_tokens,
@@ -134,15 +141,21 @@ class ClassificationLearner:
                 print("Load char encoder failxxxxxx")
 
         token_encoder = TokenCharactersEncoder(character_embedding, cnn_encoder)
-
-        text_feild_embedder = BasicTextFieldEmbedder(
-            {
-                "tokens": embedding,
-                "token_characters": token_encoder
-            }
-        )
+        if token_characters:
+            embedder = BasicTextFieldEmbedder(
+                {
+                    "tokens": embedding,
+                    "token_characters": token_encoder
+                }
+            )
+        else:
+            embedder = BasicTextFieldEmbedder(
+                {
+                    "tokens": embedding
+                }
+            )
             
-        encoder = LstmSeq2VecEncoder(input_size=text_feild_embedder.get_output_dim(),
+        encoder = LstmSeq2VecEncoder(input_size=embedder.get_output_dim(),
                                      hidden_size=hidden_size,
                                      num_layers=num_layers,
                                      bidirectional=True,
@@ -157,7 +170,7 @@ class ClassificationLearner:
 
         self.model = TextClassifier(
             vocab=self.vocab,
-            text_feild_embedder=text_feild_embedder,
+            embedder=embedder,
             encoder=encoder
         )
         self.model.to(self.device)
@@ -231,5 +244,5 @@ class ClassificationLearner:
         return predictions
 
     def load_weight(self, weight_path):
-        self.model.load_state_dict(torch.load(weight_path))
+        self.model.load_state_dict(torch.load(weight_path, map_location=torch.device(self.device)))
 
