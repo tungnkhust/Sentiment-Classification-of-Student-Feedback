@@ -74,3 +74,18 @@ Khi đánh giá dự hoặc dự đoán, có thể sử dụng 2 lựa chọn tr
 Nếu truyền serialization_dir hệ thống sẽ load trực tiếp mô hình từ thư mục serialization_dir..<br>
 Nếu truyền config_path thì hệ thống sẽ sử dụng thư mục serialization_dir được khai báo trong file config.
 
+
+## Deploy model via server api
+chạy app với lệnh sau:
+```
+python app.py --sent_serialization_dir=model_done/bilstm/sentiment --topic_serialization_dir=model_done/bilstm/sentiment
+```
+service dự đoán sẽ được chạy qua giao thức http: `http://127.0.0.1:5000/predict` <br>
+body gói tin: 
+```json
+{
+  "text": "Thầy giáo giảng bày nhiệt tình"
+}
+```
+
+
