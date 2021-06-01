@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from sklearn.metrics import classification_report
-from utils.predict_util import load_joint_learner
+from utils.learner_util import load_joint_learner
 
 
 def evaluate(test_df, sent_col, topic_col, config_path):

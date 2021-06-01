@@ -17,6 +17,8 @@
   "num_filters":34,
   "hidden_size":128,
   "dropout":0.4,
+  "model_name": "TextClassifier",
+  "bidirectional": true,
   "num_layers":2,
   "pretrained_w2v_path":null,
   "pretrained_c2v_path": null,

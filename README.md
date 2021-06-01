@@ -6,14 +6,14 @@
 pip install -r requirement.txt
 ```
 
-## Training
+## Train Word2vec
 
 ### 1 Training word embedding
 #### Để huấn luyện word embedding từ đầu chạy lệnh sau:
 ```
 python word2vec/train_w2v.py \
 --corpus_path='data/viki' \
---model_dir='models/word2vec' \
+--model_dir='pretrained/viki' \
 --name='viki' \
 --vector_size=100 \
 --window=10 \
@@ -34,7 +34,7 @@ python word2vec/train_w2v.py \
 ```
 python word2vec/train_w2v_adapt.py \
 --corpus_path='data/sentence.txt' \
---model_path='models/viki/wiki_w2v.bin' \
+--model_path='pretrained/viki/wiki_w2v.bin' \
 --model_dir='models/adapt_w2v \
 --name='viki_adapt' \
 --n_epochs=20 \
@@ -44,3 +44,33 @@ python word2vec/train_w2v_adapt.py \
 - model_dir: đường dẫn tới mơi lưu model mới sau khi train.
 - name: tên của file model mới sẽ được lưu.
 - n_epochs: số chu kỳ huấn luyện
+
+
+## Experiment model
+Để huấn luyện, đánh giá mô hình dự đoán, và dự đoán sử dụng command line interface sau:
+
+#### Huấn luyện mô hình
+```
+python run_cli.py --mode=train --config_path=configs/sentiment_config.json --checkpoint=False
+```
+
+#### Đánh giá mô hình
+```
+python run_cli.py --mode=eval --config_path=configs/sentiment_config.json --result_path=results
+python run_cli.py --mode=eval --serialization_dir=model/SentimentCLF --result_path=results
+```
+
+#### Dự đoán
+```
+python run_cli.py --mode=infer --config_path=configs/sentiment_config.json --text="Cô giáo nhiệt tình thân thiện"
+python run_cli.py --mode=infer --serialization_dir=model/SentimentCLF --text="Cô giáo nhiệt tình thân thiện"
+```
+với command line interface có 3 chế độ mode:
+- train: huấn luyện mô hình
+- eval: đánh giá mô hình
+- infer: dự đoán một câu đầu vào
+
+Khi đánh giá dự hoặc dự đoán, có thể sử dụng 2 lựa chọn truyền config_path hoặc serialization_dir.<br>
+Nếu truyền serialization_dir hệ thống sẽ load trực tiếp mô hình từ thư mục serialization_dir..<br>
+Nếu truyền config_path thì hệ thống sẽ sử dụng thư mục serialization_dir được khai báo trong file config.
+

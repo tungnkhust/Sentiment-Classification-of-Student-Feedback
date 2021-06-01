@@ -8,6 +8,7 @@ def test_predict(inputs):
 
 if __name__ == '__main__':
     inputs = {
-        "text": "Cô giáo nhiệt tình thân thiện, giảng bài rất hay"
+        "text": "Cô giáo nhiệt tình thân thiện, giảng bài rất hay",
+        "model_type": "bilstm"
     }
     test_predict(inputs)

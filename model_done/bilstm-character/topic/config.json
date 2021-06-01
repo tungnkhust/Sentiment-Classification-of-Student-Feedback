@@ -10,6 +10,8 @@
   "extend_vocab": true,
   "max_tokens": 100,
   "token_characters": true,
+  "model_name": "TextClassifier",
+  "bidirectional": true,
   "min_count": {"tokens": 3},
   "embedding_dim":100,
   "char_embedding_dim":34,

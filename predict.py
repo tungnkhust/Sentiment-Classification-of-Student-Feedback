@@ -8,7 +8,7 @@ from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_sc
 from sklearn.metrics import confusion_matrix, classification_report
 from utils.utils import plot_confusion_matrix
 import argparse
-from utils.predict_util import predict_on_text, load_learner
+from utils.learner_util import predict_on_text, load_learner
 
 
 if __name__ == '__main__':

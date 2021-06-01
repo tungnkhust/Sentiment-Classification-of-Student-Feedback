@@ -1,4 +1,7 @@
+import json
+import os
 import torch
+import numpy as np
 from typing import Dict, List
 from allennlp.data import Vocabulary
 from allennlp.data.data_loaders import SimpleDataLoader
@@ -9,14 +12,15 @@ from allennlp.training.trainer import GradientDescentTrainer
 from allennlp.training.optimizers import AdamOptimizer
 from allennlp.training.util import evaluate
 from allennlp.modules.seq2vec_encoders import CnnEncoder, LstmSeq2VecEncoder
-from classification.model.classification_model import TextClassifier
+from allennlp.modules.seq2seq_encoders import LstmSeq2SeqEncoder
+from classification.model.classification_model import TextClassifier, AttentionClassifier
 from classification.data_reader.classification_reader import ClassificationDataReader
 from utils.utils import load_vocab
 from allennlp.data import Token, Instance
 from allennlp.data.fields.text_field import TextField
 from allennlp.data.token_indexers import SingleIdTokenIndexer, TokenCharactersIndexer
 from utils.utils import plot_confusion_matrix
-import numpy as np
+
 
 
 class ClassificationLearner:
@@ -26,15 +30,18 @@ class ClassificationLearner:
             label_col: str = 'sentiment',
             text_col: str = 'text',
             vocab: Vocabulary = None,
-            vocab_path: Dict[str, str] = None,
+            vocab_count_path: Dict[str, str] = None,
+            vocabulary_dir: str = None,
             test_path: str = None,
             val_path: str = None,
             max_tokens: int = 80,
             token_indexers=None,
-            token_characters=True,
+            token_characters=False,
             min_count=None,
             extend_vocab=False,
+            model_name='TextClassifier',
             embedding_dim=100,
+            bidirectional=True,
             hidden_size=128,
             char_embedding_dim=34,
             ngram_filter_sizes=(3,),
@@ -46,7 +53,8 @@ class ClassificationLearner:
             char_encoder_path=None,
             seq_encoder_path=None,
             device: str = None,
-            serialization_dir=None
+            serialization_dir=None,
+            model_weight_path=None,
     ):
         if token_indexers is not None:
             self._token_indexers = token_indexers
@@ -88,8 +96,10 @@ class ClassificationLearner:
 
         # create vocab
         if vocab is None:
-            if vocab_path is not None:
-                self.vocab = load_vocab(vocab_path, min_count)
+            if vocabulary_dir:
+                self.vocab.from_files(vocabulary_dir)
+            elif vocab_count_path is not None:
+                self.vocab = load_vocab(vocab_count_path, min_count)
             else:
                 if self.val_data is not None:
                     self.vocab = Vocabulary.from_instances(self.train_data + self.val_data)
@@ -154,26 +164,68 @@ class ClassificationLearner:
                     "tokens": embedding
                 }
             )
-            
-        encoder = LstmSeq2VecEncoder(input_size=embedder.get_output_dim(),
-                                     hidden_size=hidden_size,
-                                     num_layers=num_layers,
-                                     bidirectional=True,
-                                     dropout=dropout)
 
-        if seq_encoder_path is not None:
-            try:
-                encoder.load_state_dict(torch.load(seq_encoder_path))
-                print('Load sequence encoder done ......')
-            except:
-                print("Load sequence encoder fail xxxxxx")
+        if model_name == 'TextClassifier':
+            encoder = LstmSeq2VecEncoder(input_size=embedder.get_output_dim(),
+                                         hidden_size=hidden_size,
+                                         num_layers=num_layers,
+                                         bidirectional=bidirectional,
+                                         dropout=dropout)
 
-        self.model = TextClassifier(
-            vocab=self.vocab,
-            embedder=embedder,
-            encoder=encoder
-        )
+            if seq_encoder_path is not None:
+                try:
+                    encoder.load_state_dict(torch.load(seq_encoder_path))
+                    print('Load sequence encoder done ......')
+                except:
+                    print("Load sequence encoder fail xxxxxx")
+
+            self.model = TextClassifier(
+                vocab=self.vocab,
+                embedder=embedder,
+                encoder=encoder
+            )
+        elif model_name == 'AttentionClassifier':
+            encoder = LstmSeq2SeqEncoder(input_size=embedder.get_output_dim(),
+                                         hidden_size=hidden_size,
+                                         num_layers=num_layers,
+                                         bidirectional=bidirectional,
+                                         dropout=dropout)
+
+            if seq_encoder_path is not None:
+                try:
+                    encoder.load_state_dict(torch.load(seq_encoder_path))
+                    print('Load sequence encoder done ......')
+                except:
+                    print("Load sequence encoder fail xxxxxx")
+            self.model = AttentionClassifier(
+                vocab=self.vocab,
+                embedder=embedder,
+                encoder=encoder,
+                dropout=dropout
+            )
+
+        if model_weight_path:
+            self.model.load_state_dict(torch.load(model_weight_path, map_location=self.device))
         self.model.to(self.device)
+
+        self.config = {}
+        self.config['text_col'] = text_col
+        self.config['label_col'] = label_col
+        self.config['max_tokens'] = max_tokens
+        self.config['embedding_dim'] = embedding_dim
+        self.config['char_embedding_dim'] = char_embedding_dim
+        self.config['ngram_filter_sizes'] = ngram_filter_sizes
+        self.config['num_filters'] = num_filters
+        self.config['hidden_size'] = hidden_size
+        self.config['dropout'] = dropout
+        self.config['num_layers'] = num_layers
+        self.config['bidirectional'] = bidirectional
+        self.config['serialization_dir'] = serialization_dir
+        self.config['token_characters'] = token_characters
+        self.config['model_name'] = model_name
+
+        if os.path.exists(self.serialization_dir + '/vocabulary') is False:
+            self.vocab.save_to_files(self.serialization_dir + '/vocabulary')
 
     def train(
         self,
@@ -184,7 +236,6 @@ class ClassificationLearner:
         grad_clipping=5
     ):
 
-        self.vocab.save_to_files(self.serialization_dir + '/vocabulary')
         train_loader = SimpleDataLoader(self.train_data, batch_size, shuffle=True)
         train_loader.index_with(self.vocab)
 
@@ -197,7 +248,6 @@ class ClassificationLearner:
         parameters = [(n, p) for n, p in self.model.named_parameters() if p.requires_grad]
         optimizer = AdamOptimizer(parameters, lr=lr, weight_decay=weight_decay)
 
-        print(self.serialization_dir)
         trainer = GradientDescentTrainer(
             model=self.model,
             serialization_dir=self.serialization_dir,
@@ -212,6 +262,7 @@ class ClassificationLearner:
         trainer.train()
 
         self.evaluate()
+        self.save_config()
 
     def evaluate(self, test_path=None, batch_size=64):
         if test_path is not None:
@@ -246,3 +297,45 @@ class ClassificationLearner:
     def load_weight(self, weight_path):
         self.model.load_state_dict(torch.load(weight_path, map_location=torch.device(self.device)))
 
+    def save_config(self):
+        serialization_dir = self.serialization_dir
+        with open(serialization_dir + '/config.json', 'w') as pf:
+            json.dump(self.config, pf)
+
+    @classmethod
+    def from_serialization(
+            cls,
+            serialization_dir,
+            train_path=None,
+            val_path=None,
+            test_path=None
+    ):
+        config_path = serialization_dir + '/config.json'
+        with open(config_path, 'r') as pf:
+            config = json.load(pf)
+
+        vocabulary_dir = serialization_dir + '/vocabulary'
+        vocab = Vocabulary.from_files(vocabulary_dir)
+
+        model_weight_path = serialization_dir + '/best.th'
+        return cls(
+            train_path=train_path,
+            val_path=val_path,
+            test_path=test_path,
+            vocab=vocab,
+            label_col=config['label_col'],
+            text_col=config['text_col'],
+            model_name=config['model_name'],
+            token_characters=config['token_characters'],
+            max_tokens=config['max_tokens'],
+            embedding_dim=config['embedding_dim'],
+            char_embedding_dim=config['char_embedding_dim'],
+            ngram_filter_sizes=config['ngram_filter_sizes'],
+            num_filters=config['num_filters'],
+            hidden_size=config['hidden_size'],
+            dropout=config['dropout'],
+            num_layers=config['num_layers'],
+            bidirectional=config['bidirectional'],
+            serialization_dir=config['serialization_dir'],
+            model_weight_path=model_weight_path
+        )
