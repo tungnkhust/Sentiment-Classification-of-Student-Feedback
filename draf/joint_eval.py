@@ -58,7 +58,7 @@ def evaluate(test_df, sent_col, topic_col, config_path):
 
 
 if __name__ == '__main__':
-    config_path = 'configs/joint_config.json'
+    config_path = '../configs/joint_config.json'
 
-    test_df = pd.read_csv('data/processed/test.csv')
+    test_df = pd.read_csv('../data/processed/test.csv')
     evaluate(test_df, sent_col='sentiment', topic_col='topic', config_path=config_path)

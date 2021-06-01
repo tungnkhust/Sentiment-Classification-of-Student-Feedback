@@ -1,13 +1,13 @@
 import os
 import shutil
 import json
-from classification.learners.classification_learner import ClassificationLearner
+from classification.learners.joint_learner import JointLearner
 import argparse
 
 
 def train(config, checkpoint=False):
-    if os.path.exists('models') is False:
-        os.mkdir('models')
+    if os.path.exists('../models') is False:
+        os.mkdir('../models')
 
     serialization_dir = config['serialization_dir']
 
@@ -15,16 +15,16 @@ def train(config, checkpoint=False):
         if os.path.exists(serialization_dir):
             shutil.rmtree(serialization_dir)
 
-    sentiment_clf_learner = ClassificationLearner(
+    sentiment_clf_learner = JointLearner(
         train_path=config['train_path'],
         text_col=config['text_col'],
-        label_col=config['label_col'],
+        sent_col=config['sent_col'],
+        topic_col=config['topic_col'],
         serialization_dir=serialization_dir,
         val_path=config['val_path'],
         test_path=config['test_path'],
         vocab=None,
-        token_characters=config['token_characters'],
-        vocab_count_path=config['vocab_count_path'],
+        vocab_path=config['vocab_path'],
         extend_vocab=config['extend_vocab'],
         max_tokens=config['max_tokens'],
         min_count=config['min_count'],
@@ -52,7 +52,7 @@ def train(config, checkpoint=False):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-cf', '--config', type=str, default='configs/topic_config.json', help='')
+    parser.add_argument('-cf', '--config', type=str, default='configs/joint_config.json', help='')
 
     args = parser.parse_args()
     with open(args.config, 'r') as pf:

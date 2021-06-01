@@ -6,8 +6,8 @@ import argparse
 
 
 def train(config, checkpoint=False):
-    if os.path.exists('models') is False:
-        os.mkdir('models')
+    if os.path.exists('../models') is False:
+        os.mkdir('../models')
 
     serialization_dir = config['serialization_dir']
 

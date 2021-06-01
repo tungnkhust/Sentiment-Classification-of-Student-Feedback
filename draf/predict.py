@@ -12,8 +12,8 @@ from utils.learner_util import predict_on_text, load_learner
 
 
 if __name__ == '__main__':
-    topic_config_path = 'configs/topic_config.json'
-    sent_config_path = 'configs/sentiment_config.json'
+    topic_config_path = '../configs/topic_config.json'
+    sent_config_path = '../configs/sentiment_config.json'
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--sent_config_path', type=str, default='configs/sentiment_config.json', help='')
