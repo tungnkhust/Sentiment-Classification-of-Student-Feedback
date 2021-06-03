@@ -11,13 +11,14 @@ from utils.utils import plot_confusion_matrix
 
 def evaluate(learner, test_df, result_path='results'):
     if os.path.exists(result_path) is False:
-        os.mkdir(result_path)
+        os.makedirs(result_path)
     learner.model.eval()
     label_col = learner.config['label_col']
     vocab = learner.vocab
     texts = test_df['text'].tolist()
     label_true = test_df[label_col].tolist()
-    label_pred = learner.predict_on_texts(texts)
+    predictions = learner.predict_on_texts(texts)
+    label_pred = [prediction['prediction'] for prediction in predictions]
     y_true = [vocab.get_token_index(label, namespace='labels') for label in label_true]
     y_pred = [vocab.get_token_index(label, namespace='labels') for label in label_pred]
 
@@ -35,7 +36,7 @@ def evaluate(learner, test_df, result_path='results'):
     print('Recall   :', recall)
     print('F1-Score :', f1)
 
-    with open(f'results/{label_col}_score.txt', 'w') as pf:
+    with open(f'{result_path}/{label_col}_score.txt', 'w') as pf:
         pf.write(f'Accuracy score :{acc}\n')
         pf.write(f'Precision score:{precision}\n')
         pf.write(f'Recall score   :{recall}\n')
@@ -44,14 +45,16 @@ def evaluate(learner, test_df, result_path='results'):
         pf.write(report)
 
     cm = confusion_matrix(label_true, label_pred, labels=labels)
-    plot_confusion_matrix(cm, target_names=labels, title=f'Confusion Matrix ({label_col})', normalize=False)
-    plot_confusion_matrix(cm, target_names=labels, title=f'Confusion Matrix Normalize ({label_col})', normalize=True)
+    plot_confusion_matrix(cm, target_names=labels, title=f'Confusion Matrix ({label_col})',
+                          normalize=False, save_dir=result_path)
+    plot_confusion_matrix(cm, target_names=labels, title=f'Confusion Matrix Normalize ({label_col})',
+                          normalize=True, save_dir=result_path)
 
     test_df[f'{label_col}_predict'] = label_pred
     false_pred_df = test_df[test_df[label_col] != test_df[f'{label_col}_predict']]
-    false_pred_df.to_csv(f'results/false_{label_col}_predictions.csv', index=False)
+    false_pred_df.to_csv(f'{result_path}/false_{label_col}_predictions.csv', index=False)
     true_pred_df = test_df[test_df[label_col] == test_df[f'{label_col}_predict']]
-    true_pred_df.to_csv(f'results/true_{label_col}_predictions.csv', index=False)
+    true_pred_df.to_csv(f'{result_path}/true_{label_col}_predictions.csv', index=False)
 
 
 def load_joint_learner(config_path):
@@ -107,14 +110,22 @@ def load_learner(config_path):
 
 
 def predict_on_text(sentiment_learner, topic_learner, text):
-    sentiment, sentiment_confidence = sentiment_learner.predict(text)
-    topic, topic_confidence = topic_learner.predict(text)
-    return {
+    sent_prediction = sentiment_learner.predict(text)
+    topic_prediction = topic_learner.predict(text)
+    output = {
         'text': text,
-        'sentiment': sentiment,
-        'sentiment_confidence': str(sentiment_confidence),
-        'topic': topic,
-        'topic_confidence': str(topic_confidence),
+        'sentiment': sent_prediction['prediction'],
+        'sentiment_confidence': sent_prediction['confidence'],
+        'topic': topic_prediction['prediction'],
+        'topic_confidence': topic_prediction['confidence'],
         'model_sentiment': sentiment_learner.model.__class__.__name__,
         'model_topic': sentiment_learner.model.__class__.__name__
     }
+
+    if 'att_weight' in sent_prediction:
+        output['sentiment_att_weight'] = sent_prediction['att_weight']
+
+    if 'att_weight' in topic_prediction:
+        output['topic_att_weight'] = topic_prediction['att_weight']
+
+    return output

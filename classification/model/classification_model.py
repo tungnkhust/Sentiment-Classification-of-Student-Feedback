@@ -81,10 +81,7 @@ class AttentionClassifier(Model):
         self.attention_layer = AdditiveAttention(vector_dim=encoder.get_output_dim(),
                                                  matrix_dim=encoder.get_output_dim(),
                                                  normalize=True)
-        self.project_layer = torch.nn.Linear(self.encoder.get_output_dim() * 2, self.encoder.get_output_dim())
-        self.relu = torch.nn.ReLU()
-        self.drop = torch.nn.Dropout(dropout)
-        self.classifier = torch.nn.Linear(self.encoder.get_output_dim(), self.num_labels)
+        self.classifier = torch.nn.Linear(self.encoder.get_output_dim()*2, self.num_labels)
         self.accuracy = CategoricalAccuracy()
 
         self.init_weight()
@@ -92,7 +89,6 @@ class AttentionClassifier(Model):
         self.f1_measure = F1Measure(1)
 
     def init_weight(self):
-        torch.nn.init.xavier_normal_(self.project_layer.weight)
         torch.nn.init.xavier_normal_(self.classifier.weight)
 
     def forward(self,
@@ -119,16 +115,14 @@ class AttentionClassifier(Model):
         # Shape: (batch_size, hidden_size)
         att_hidden = torch.bmm(encoded_text.transpose(-2, -1), att_weight.unsqueeze(-1)).squeeze(-1)
         context_att = torch.cat([context_vector, att_hidden], dim=-1)
-        project_hidden = self.relu(self.project_layer(context_att))
-        project_hidden = self.drop(project_hidden)
-        logits = self.classifier(project_hidden)
+        logits = self.classifier(context_att)
         # Shape: (batch_size, num_labels)
         probs = torch.nn.functional.softmax(logits)
         # Shape: (1,)
         output = {
             'probs': probs,
             'logits': logits,
-            'att_weight': att_weight
+            'att_weight': att_weight,
         }
         if label is not None:
             loss = torch.nn.functional.cross_entropy(logits, label)

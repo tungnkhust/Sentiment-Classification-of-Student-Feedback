@@ -57,13 +57,13 @@ python run_cli.py --mode=train --config_path=configs/sentiment_config.json --che
 #### Đánh giá mô hình
 ```
 python run_cli.py --mode=eval --config_path=configs/sentiment_config.json --result_path=results
-python run_cli.py --mode=eval --serialization_dir=model/SentimentCLF --result_path=results
+python run_cli.py --mode=eval --serialization_dir=model_done/bilstm/sentiment --result_path=results
 ```
 
 #### Dự đoán
 ```
 python run_cli.py --mode=infer --config_path=configs/sentiment_config.json --text="Cô giáo nhiệt tình thân thiện"
-python run_cli.py --mode=infer --serialization_dir=model/SentimentCLF --text="Cô giáo nhiệt tình thân thiện"
+python run_cli.py --mode=infer --serialization_dir=model_done/bilstm/sentiment --text="Cô giáo nhiệt tình thân thiện"
 ```
 với command line interface có 3 chế độ mode:
 - train: huấn luyện mô hình
@@ -87,5 +87,19 @@ body gói tin:
   "text": "Thầy giáo giảng bày nhiệt tình"
 }
 ```
+
+- Có thể lựa chọn run toàn bộ model bằng lệnh sau:
+```
+python app.py --all_model=1
+```
+
+Hiện tại chỉ support các model có model_type thuộc ['bilstm', 'character', 'attention', 'character-attention'], body gói tin có dạng sau: 
+```json
+{
+  "text": "Thầy giáo giảng bày nhiệt tình",
+  "model_type" : "bilstm"
+}
+```
+
 
 

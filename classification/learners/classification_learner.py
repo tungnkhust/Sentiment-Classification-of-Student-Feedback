@@ -19,8 +19,7 @@ from utils.utils import load_vocab
 from allennlp.data import Token, Instance
 from allennlp.data.fields.text_field import TextField
 from allennlp.data.token_indexers import SingleIdTokenIndexer, TokenCharactersIndexer
-from utils.utils import plot_confusion_matrix
-
+from utils.utils import set_seed
 
 
 class ClassificationLearner:
@@ -55,7 +54,10 @@ class ClassificationLearner:
             device: str = None,
             serialization_dir=None,
             model_weight_path=None,
+            seed=42
     ):
+        set_seed(seed)
+
         if token_indexers is not None:
             self._token_indexers = token_indexers
         else:
@@ -223,6 +225,7 @@ class ClassificationLearner:
         self.config['serialization_dir'] = serialization_dir
         self.config['token_characters'] = token_characters
         self.config['model_name'] = model_name
+        self.config['seed'] = seed
 
         if os.path.exists(self.serialization_dir + '/vocabulary') is False:
             self.vocab.save_to_files(self.serialization_dir + '/vocabulary')
@@ -287,19 +290,28 @@ class ClassificationLearner:
         output = self.model.forward_on_instance(instance)
         y_prediction = np.argmax(output['probs'], axis=-1)
         y_probs = np.max(output['probs'], axis=-1)
-        prediction = self.vocab.get_token_from_index(y_prediction, namespace='labels')
-        return prediction, y_probs
+        prediction_label = self.vocab.get_token_from_index(y_prediction, namespace='labels')
+        prediction = {
+            "prediction": prediction_label,
+            "confidence": y_probs.item(),
+            "text": text
+        }
+        if 'att_weight' in output:
+            prediction['att_weight'] = output['att_weight'].astype(np.float32).tolist()
+        return prediction
 
     def predict_on_texts(self, texts: List[str]):
-        predictions = [self.predict(text)[0] for text in texts]
+        predictions = [self.predict(text) for text in texts]
         return predictions
 
     def load_weight(self, weight_path):
         self.model.load_state_dict(torch.load(weight_path, map_location=torch.device(self.device)))
 
-    def save_config(self):
-        serialization_dir = self.serialization_dir
-        with open(serialization_dir + '/config.json', 'w') as pf:
+    def save_config(self, config_path=None):
+        if config_path is None:
+            serialization_dir = self.serialization_dir
+            config_path = serialization_dir + '/config.json'
+        with open(config_path, 'w') as pf:
             json.dump(self.config, pf)
 
     @classmethod
@@ -337,5 +349,6 @@ class ClassificationLearner:
             num_layers=config['num_layers'],
             bidirectional=config['bidirectional'],
             serialization_dir=config['serialization_dir'],
+            seed=config['seed'],
             model_weight_path=model_weight_path
         )

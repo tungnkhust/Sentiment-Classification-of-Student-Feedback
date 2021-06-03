@@ -7,6 +7,13 @@ import torch
 from allennlp.data import Vocabulary
 
 
+def set_seed(seed=42):
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+
+
 def load_vocab(vocab_path: Dict[str, str], min_count: Dict[str, int]):
     counter = {}
     for namespace in vocab_path:
@@ -136,7 +143,7 @@ def plot_confusion_matrix(
     plt.xlabel('Predicted label')
 
     if os.path.exists(save_dir) is False:
-        os.mkdir(save_dir)
+        os.makedirs(save_dir)
 
     try:
         print(f"Save confusion-matrix...")
