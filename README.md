@@ -6,6 +6,7 @@
 - Sau khi cài đặt tạo môi trường mới:
 ```
 conda create -n name_env python==3.6.9
+conda activate name_env
 ```
 - Cài đặt các package và thư viện liên quan
 ```bash
