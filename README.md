@@ -1,6 +1,12 @@
 # BTL_NLP
 
 ## Set up
+#### Cài đặt môi trường
+- Cài đặt môi trường anaconda theo hướng dẫn tại [đây](https://docs.anaconda.com/anaconda/install/)
+- Sau khi cài đặt tạo môi trường mới:
+```
+conda create -n name_env python==3.6.9
+```
 - Cài đặt các package và thư viện liên quan
 ```bash
 pip install -r requirement.txt
