@@ -121,6 +121,8 @@ logging.info(f'Load all model: {args.all_model}')
 def predict():
     start_time = time.time()
     if request.method == 'POST':
+        if request.json is None or "text" not in request.json:
+            abort(400, f"text is not found. You must pass text in body")     
         text = request.json['text']
         if args.all_model:
             if "model_type" not in request.json:
