@@ -2,43 +2,85 @@ import React from 'react'
 import { Form, Col, Row, Button } from 'react-bootstrap'
 import api from './api/api'
 import 'bootstrap/dist/css/bootstrap.min.css';
+import colormap from 'colormap'
 class App extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
       text: '',
-      model: 'bilstm'
+      model: 'bilstm',
+      print: false
     }
   }
   changHandler = (e) => {
+
     let name = e.target.name;
     let value = e.target.value;
-    this.setState({ [name]: value })
+    this.setState({ [name]: value ,print:false})
   }
   submit = async (e) => {
     e.preventDefault()
     try {
       let res = await api.getPredict(this.state.text, this.state.model)
       let data = res.data;
-      this.setState({ data });
+
+      this.setState({ data:data, print:true });
       console.log(data)
     } catch (err) {
       console.log(err)
     }
   }
 
-  render() {
-    let predictLabel = '';
-    let attention = '';
-    if (this.state.data) {
-      if (this.state.model === 'attention' || this.state.model === 'character-attention') {
-        attention = <tr>
-          <td className='min'><b>Attention score</b></td>
-          <td className='max'>{(this.state.data.sentiment_confidence * 100).toFixed(2)}%</td>
-          <td className='max'>{(this.state.data.topic_confidence * 100).toFixed(2)}%</td>
-        </tr>
-      }
-      predictLabel = <div>
+  colors = colormap({
+    colormap: 'bluered',
+    nshades: 255,
+    format: 'hex',
+    alpha: 1
+  })
+
+  getBackGroundColor = (v) => {
+    let x = parseInt(254*v)
+    return this.colors[x]
+  }
+
+  getColorMap = () => {
+    let row = []
+    for(let i = 0; i<254; i++){
+      row.push(
+        <div style= {{backgroundColor: this.colors[i], width:"3px", height:"50px"}} title={i/254.0}></div>
+      )
+    }
+    return row
+  }
+
+  getSentimentDistributed = (text,w) => {
+    let texts = text.split(" ");
+    return texts.map((text,index) => {
+      return <span title={w[index].toFixed(3)} className ="ml-1" style={{color: this.getBackGroundColor(w[index]) , cursor:"default"}}>{text}</span>
+    })
+  }
+
+  getPredictLabel = () => {
+    let attention 
+    let colorMap
+    if (this.state.model === 'attention' || this.state.model === 'character-attention') {
+      attention = <tr>
+        <td className='min'><b>Attention distribution</b></td>
+        <td className='max'>
+          <div className="d-flex justify-content-center flex-wrap">
+            {this.getSentimentDistributed(this.state.data.text,this.state.data.sentiment_att_weight)}
+          </div>
+        </td>
+        <td className='max'>
+        <div className="d-flex justify-content-center flex-wrap">
+            {this.getSentimentDistributed(this.state.data.text,this.state.data.topic_att_weight)}
+          </div>
+        </td>
+      </tr>
+      colorMap = this.getColorMap()
+    }
+    return (
+      <div>
         <br></br>
         <div className="row">
           <table className='table table-bordered table-striped' style={{ width: '100%', fontSize: '22px' }}>
@@ -64,9 +106,14 @@ class App extends React.Component {
             </tbody>
           </table>
         </div>
+        <div className="d-flex justify-content-center">
+            {colorMap}
+        </div>
       </div>
+    )
+  }
 
-    }
+  render() {
     return (
       <div className="container">
         <Form onSubmit={this.submit}>
@@ -106,7 +153,7 @@ class App extends React.Component {
           </Form.Group>
         </Form>
         <div>
-          {predictLabel}
+          {this.state.print && this.getPredictLabel()}
         </div>
       </div>
     )
